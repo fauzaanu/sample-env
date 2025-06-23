@@ -71,7 +71,8 @@ val6 = os.getenv(key)
             write_sample(vars_set, outfile)
         output = buf.getvalue()
         self.assertIn("Wrote 3 entries to", output)
-        lines = open(outfile, encoding='utf-8').read().splitlines()
+        with open(outfile, encoding='utf-8') as f:
+            lines = f.read().splitlines()
         self.assertEqual(lines, ["ALPHA=", "MIDDLE=", "ZED="])
 
     def test_main_no_vars(self):
