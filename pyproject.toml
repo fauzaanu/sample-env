@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.scripts]
-sample-env = "sample_env.main:main"
+sample-env = "src.sample_env.main:main"
 
 [build-system]
 requires = ["hatchling"]
