@@ -19,4 +19,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run tests
         run: |
-          python -m unittest src\sample_env\tests.py
+          python -m unittest src//sample_env//tests.py
