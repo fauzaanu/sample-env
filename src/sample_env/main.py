@@ -13,6 +13,7 @@ import os
 import ast
 import argparse
 from pathlib import Path
+from fnmatch import fnmatch
 
 
 def find_env_vars_in_file(path):
@@ -93,18 +94,27 @@ def find_all_env_vars(root):
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#"):
-                    if line.endswith("/"):
-                        ignored_dirs.add(Path(line.rstrip("/")))
+                    if line.endswith('/'):
+                        base = line.rstrip('/')
+                        # Match directories with or without leading path components
+                        ignored_patterns.update({
+                            f"{base}/**",
+                            f"**/{base}/**",
+                        })
                     else:
-                        ignored_files.add(line)
+                        # Ignore this file or directory anywhere in the tree
+                        ignored_patterns.update({
+                            line,
+                            f"**/{line}",
+                            f"{line}/**",
+                            f"**/{line}/**",
+                        })
 
-    for path in Path(root).rglob("*.py"):
-        rel = path.relative_to(root)
-        if any(rel == d or rel.is_relative_to(d) for d in ignored_dirs):
-            continue
-        if any(rel.match(f) or rel.name == f for f in ignored_files):
-            continue
-        envs.update(find_env_vars_in_file(path))
+    root_path = Path(root)
+    for path in root_path.rglob("*.py"):
+        rel_posix = path.relative_to(root_path).as_posix()
+        if not any(fnmatch(rel_posix, pattern) for pattern in ignored_patterns):
+            envs.update(find_env_vars_in_file(path))
     return envs
 
 
