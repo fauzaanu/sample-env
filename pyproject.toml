@@ -1,5 +1,5 @@
 [project]
-name = "Sample Env"
+name = "sample-env"
 version = "0.1.0"
 description = "A utility to generate a sample .env file for Python projects by detecting environment variable references in the code."
 readme = "README.md"
