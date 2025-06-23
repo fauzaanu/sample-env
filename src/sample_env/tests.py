@@ -65,12 +65,16 @@ val6 = os.getenv(key)
 
     def test_gitignore_exclusion(self):
         # Create a .gitignore file
-        gitignore_content = "ignored_dir/\nignored_file.py\n"
+        gitignore_content = "ignored_dir/\nignored_file.py\n.venv\nbuild/\n"
         self.create_file('.gitignore', gitignore_content)
 
         # Create files that should be ignored
         self.create_file('ignored_dir/ignored.py', 'import os; x = os.getenv("SHOULD_NOT_BE_FOUND")')
+        self.create_file('ignored_dir/nested/inner.py', 'import os; y = os.getenv("NESTED_NOT_FOUND")')
         self.create_file('ignored_file.py', 'import os; y = os.getenv("ALSO_NOT_FOUND")')
+        self.create_file('.venv/venv_file.py', 'import os; y = os.getenv("VENV_VAR")')
+        self.create_file('sub/.venv/nested.py', 'import os; y = os.getenv("SUB_VENV")')
+        self.create_file('sub/build/skip.py', 'import os; y = os.getenv("BUILD_VAR")')
 
         # Create a file that should be included
         self.create_file('included.py', 'import os; z = os.getenv("SHOULD_BE_FOUND")')
