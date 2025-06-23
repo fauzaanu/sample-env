@@ -71,7 +71,11 @@ def find_all_env_vars(root):
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#"):
-                    ignored_patterns.add(line)
+                    # Convert .gitignore patterns to match Path objects
+                    if line.endswith('/'):
+                        ignored_patterns.add(f"**/{line}*")
+                    else:
+                        ignored_patterns.add(f"**/{line}")
 
     for path in Path(root).rglob("*.py"):
         if not any(path.match(f"**/{pattern}") for pattern in ignored_patterns):
