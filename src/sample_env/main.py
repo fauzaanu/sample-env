@@ -64,17 +64,17 @@ def find_env_vars_in_file(path):
 def find_all_env_vars(root):
     envs = set()
     gitignore_path = Path(root) / ".gitignore"
-    ignored_dirs = set()
+    ignored_patterns = set()
 
     if gitignore_path.exists():
         with open(gitignore_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#"):
-                    ignored_dirs.add(line)
+                    ignored_patterns.add(line)
 
     for path in Path(root).rglob("*.py"):
-        if not any(ignored_dir in path.parts for ignored_dir in ignored_dirs):
+        if not any(path.match(pattern) for pattern in ignored_patterns):
             envs.update(find_env_vars_in_file(path))
     return envs
 
