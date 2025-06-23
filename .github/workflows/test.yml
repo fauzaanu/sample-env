@@ -1,0 +1,22 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: python:${{ matrix.python-version }}
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12' ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: |
+          python -m unittest src\sample_env\tests.py
