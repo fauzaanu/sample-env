@@ -1,6 +1,7 @@
 # Sample Env
+[![Tests](https://github.com/fauzaanu/sample-env/actions/workflows/test.yml/badge.svg)](https://github.com/fauzaanu/sample-env/actions/workflows/test.yml)
 
-Sample Env is a utility to generate a sample `.env` file for Python projects by detecting environment variable references in the code. This tool helps developers quickly identify and document the environment variables their project uses.
+Sample Env is a utility to generate a sample `.env` file for Python projects by detecting environment variable references in the code. This tool helps developers quickly generate a sample.env file without going through the code or accidentally missing out on a variable that is perheps needed for production.
 
 ## Features
 
