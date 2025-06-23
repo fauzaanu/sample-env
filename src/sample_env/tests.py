@@ -8,7 +8,7 @@ from pathlib import Path
 
 # ensure project root is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from make_env_sample import find_env_vars_in_file, find_all_env_vars, write_sample, main
+from sample_env.main import find_env_vars_in_file, find_all_env_vars, write_sample, main
 
 class TestMakeEnvSample(unittest.TestCase):
     def setUp(self):
