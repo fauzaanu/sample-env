@@ -74,7 +74,7 @@ def find_all_env_vars(root):
                     ignored_patterns.add(line)
 
     for path in Path(root).rglob("*.py"):
-        if not any(path.match(pattern) for pattern in ignored_patterns):
+        if not any(path.match(f"**/{pattern}") for pattern in ignored_patterns):
             envs.update(find_env_vars_in_file(path))
     return envs
 
