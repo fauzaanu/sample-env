@@ -63,7 +63,20 @@ val6 = os.getenv(key)
         all_found = find_all_env_vars(self.tmp_dir.name)
         self.assertEqual(all_found, {"ONE", "TWO"})
 
-    def test_write_sample(self):
+    def test_gitignore_exclusion(self):
+        # Create a .gitignore file
+        gitignore_content = "ignored_dir/\nignored_file.py\n"
+        self.create_file('.gitignore', gitignore_content)
+
+        # Create files that should be ignored
+        self.create_file('ignored_dir/ignored.py', 'import os; x = os.getenv("SHOULD_NOT_BE_FOUND")')
+        self.create_file('ignored_file.py', 'import os; y = os.getenv("ALSO_NOT_FOUND")')
+
+        # Create a file that should be included
+        self.create_file('included.py', 'import os; z = os.getenv("SHOULD_BE_FOUND")')
+
+        all_found = find_all_env_vars(self.tmp_dir.name)
+        self.assertEqual(all_found, {"SHOULD_BE_FOUND"})
         vars_set = {"ZED", "ALPHA", "MIDDLE"}
         outfile = os.path.join(self.tmp_dir.name, 'out.env')
         buf = io.StringIO()
