@@ -24,19 +24,40 @@ def find_env_vars_in_file(path):
         # match os.getenv("VAR")
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             func = node.func
-            if isinstance(func.value, ast.Name) and func.value.id == "os" and func.attr == "getenv":
-                if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+            if (
+                isinstance(func.value, ast.Name)
+                and func.value.id == "os"
+                and func.attr == "getenv"
+            ):
+                if (
+                    node.args
+                    and isinstance(node.args[0], ast.Constant)
+                    and isinstance(node.args[0].value, str)
+                ):
                     found.add(node.args[0].value)
 
             # match os.environ.get("VAR", ...) and environ.get("VAR", ...)
             if func.attr == "get":
                 # os.environ.get(...)
-                if isinstance(func.value, ast.Attribute) and isinstance(func.value.value, ast.Name) and func.value.value.id == "os" and func.value.attr == "environ":
-                    if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                if (
+                    isinstance(func.value, ast.Attribute)
+                    and isinstance(func.value.value, ast.Name)
+                    and func.value.value.id == "os"
+                    and func.value.attr == "environ"
+                ):
+                    if (
+                        node.args
+                        and isinstance(node.args[0], ast.Constant)
+                        and isinstance(node.args[0].value, str)
+                    ):
                         found.add(node.args[0].value)
                 # from os import environ; environ.get(...)
                 if isinstance(func.value, ast.Name) and func.value.id == "environ":
-                    if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                    if (
+                        node.args
+                        and isinstance(node.args[0], ast.Constant)
+                        and isinstance(node.args[0].value, str)
+                    ):
                         found.add(node.args[0].value)
 
         # match os.environ["VAR"] and environ["VAR"]
@@ -64,22 +85,26 @@ def find_env_vars_in_file(path):
 def find_all_env_vars(root):
     envs = set()
     gitignore_path = Path(root) / ".gitignore"
-    ignored_patterns = set()
+    ignored_dirs = set()
+    ignored_files = set()
 
     if gitignore_path.exists():
         with open(gitignore_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#"):
-                    # Convert .gitignore patterns to match Path objects
-                    if line.endswith('/'):
-                        ignored_patterns.add(f"{line}*")
+                    if line.endswith("/"):
+                        ignored_dirs.add(Path(line.rstrip("/")))
                     else:
-                        ignored_patterns.add(line)
+                        ignored_files.add(line)
 
     for path in Path(root).rglob("*.py"):
-        if not any(path.match(f"**/{pattern}") for pattern in ignored_patterns):
-            envs.update(find_env_vars_in_file(path))
+        rel = path.relative_to(root)
+        if any(rel == d or rel.is_relative_to(d) for d in ignored_dirs):
+            continue
+        if any(rel.match(f) or rel.name == f for f in ignored_files):
+            continue
+        envs.update(find_env_vars_in_file(path))
     return envs
 
 
@@ -92,8 +117,15 @@ def write_sample(env_vars, output_file):
 
 def main():
     parser = argparse.ArgumentParser(description="Generate .env.sample from code")
-    parser.add_argument("project_dir", nargs="?", default=".", help="Root of your Python project")
-    parser.add_argument("-o", "--output", default=".env.sample", help="Output file (default .env.sample)")
+    parser.add_argument(
+        "project_dir", nargs="?", default=".", help="Root of your Python project"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=".env.sample",
+        help="Output file (default .env.sample)",
+    )
     args = parser.parse_args()
 
     env_vars = find_all_env_vars(args.project_dir)
