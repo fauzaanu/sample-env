@@ -17,7 +17,7 @@ Sample Env is a utility to generate a sample `.env` file for Python projects by 
 You can install Sample Env directly from the GitHub repository:
 
 ```bash
-pip install git+https://github.com/fauzaanu/sample-env.git
+uv add https://github.com/fauzaanu/sample-env.git --dev
 ```
 
 ## Usage
